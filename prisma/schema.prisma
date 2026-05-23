@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  ACCOUNTANT
+  ICT_ADMIN
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+}
+
+model School {
+  id         String    @id @default(cuid())
+  name       String
+  code       String    @unique
+  address    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  users      User[]
+  students   Student[]
+  assets     Asset[]
+  invoices   Invoice[]
+  attendance AttendanceRecord[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(ADMIN)
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Student {
+  id             String             @id @default(cuid())
+  firstName      String
+  lastName       String
+  admissionNo    String             @unique
+  className      String
+  schoolId       String
+  school         School             @relation(fields: [schoolId], references: [id])
+  attendance     AttendanceRecord[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model AttendanceRecord {
+  id          String           @id @default(cuid())
+  date        DateTime
+  status      AttendanceStatus
+  note        String?
+  studentId   String
+  schoolId    String
+  student     Student          @relation(fields: [studentId], references: [id])
+  school      School           @relation(fields: [schoolId], references: [id])
+  recordedAt  DateTime         @default(now())
+
+  @@index([date])
+  @@unique([studentId, date])
+}
+
+model Asset {
+  id            String      @id @default(cuid())
+  name          String
+  category      String
+  serialNumber  String      @unique
+  status        AssetStatus @default(ACTIVE)
+  purchaseDate  DateTime?
+  schoolId      String
+  school        School      @relation(fields: [schoolId], references: [id])
+  createdAt     DateTime    @default(now())
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  title       String
+  amount      Decimal   @db.Decimal(10, 2)
+  dueDate     DateTime
+  schoolId    String
+  school      School    @relation(fields: [schoolId], references: [id])
+  payments    Payment[]
+  createdAt   DateTime  @default(now())
+}
+
+model Payment {
+  id         String    @id @default(cuid())
+  amount     Decimal   @db.Decimal(10, 2)
+  paidAt     DateTime  @default(now())
+  invoiceId  String
+  invoice    Invoice   @relation(fields: [invoiceId], references: [id])
+}
