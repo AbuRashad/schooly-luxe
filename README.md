@@ -1,137 +1,85 @@
 # Schooly Luxe
 
-Schooly Luxe is a premium school management MVP built as a TypeScript-first monorepo. It combines school administration, attendance, finance foundations, analytics, and ICT asset management in a modern dashboard experience.
+Schooly Luxe is a premium school management platform. This repository contains a **Streamlit** Python app that can be deployed instantly on [Streamlit Community Cloud](https://streamlit.io/cloud) — no database or server setup required.
 
-## Product framing
+## Live demo
 
-- **Product name**: Schooly Luxe
-- **Positioning**: Premium school operations platform
-- **MVP modules**:
-  - Authentication + role-aware user profile
-  - Schools
-  - Students
-  - Attendance
-  - ICT Assets
-  - Dashboard analytics summary
-  - Finance foundation (invoices + payments for summary KPIs)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/AbuRashad/schooly-luxe/main/streamlit_app.py)
 
-## Monorepo layout
+## Product modules
 
-```text
-apps/
-  api/            NestJS backend API + JWT auth + Prisma integration
-  web/            Next.js web dashboard (Tailwind + TypeScript)
-packages/
-  config/         Shared TS config presets
-  types/          Shared cross-app TypeScript contracts
-  ui/             Shared UI primitives
-prisma/
-  schema.prisma   Database schema
-  seed.ts         Seed script
-infrastructure/
-  docker/
-    docker-compose.yml
+- 🔐 Login with role-aware user profile
+- 📊 Dashboard analytics summary (students, attendance, assets, finance KPIs)
+- 👩‍🎓 Students – list and enroll new students
+- 📋 Attendance – view and record daily attendance
+- 🖥️ ICT Assets – asset registry with status tracking
 
-docs/
-  architecture.md
-```
+## Demo credentials
 
-## Tech stack
+| Email | Password | Role |
+|---|---|---|
+| admin@schoolyluxe.com | Admin@12345 | ADMIN |
+| teacher@schoolyluxe.com | Teacher@12345 | TEACHER |
 
-- **Workspace**: pnpm + turbo
-- **Frontend**: Next.js 14 + Tailwind CSS + Zod
-- **Backend**: NestJS 10 + Zod + JWT auth
-- **Database**: PostgreSQL 16
-- **ORM**: Prisma
-
-## Quick start
+## Quick start (local)
 
 ### 1) Prerequisites
 
-- Node.js 20+ (Node 24 tested)
-- pnpm 9+
-- Docker (for local PostgreSQL)
+- Python 3.9+
 
-### 2) Environment
+### 2) Install dependencies
 
 ```bash
-cp .env.example .env
+pip install -r requirements.txt
 ```
 
-### 3) Start database
+### 3) Run the app
 
 ```bash
-docker compose -f infrastructure/docker/docker-compose.yml up -d
+streamlit run streamlit_app.py
 ```
 
-### 4) Install dependencies
+The app opens at **http://localhost:8501**.
 
-```bash
-pnpm install
+## Deploy on Streamlit Community Cloud
+
+1. Fork / push this repo to GitHub.
+2. Go to [share.streamlit.io](https://share.streamlit.io) and click **New app**.
+3. Select your repo and set the **Main file path** to `streamlit_app.py`.
+4. Click **Deploy** — no environment variables needed.
+
+> **Note:** The app uses in-memory session state for demo purposes. Data resets on page refresh. For persistent storage in production, connect a database (e.g. Supabase, PlanetScale) and adapt `_make_seed_data()` / the page functions accordingly.
+
+## Repository layout
+
+```text
+streamlit_app.py        Python Streamlit entrypoint (main app)
+requirements.txt        Python dependencies
+.streamlit/
+  config.toml           Streamlit theme (dark, amber accent)
+
+# Legacy TypeScript monorepo (reference only — not required to run the Streamlit app)
+apps/
+  api/                  NestJS backend (original architecture)
+  web/                  Next.js frontend (original architecture)
+packages/               Shared TS packages
+prisma/                 Prisma schema + seed
+infrastructure/         Docker Compose for Postgres
+docs/                   Architecture docs
 ```
 
-### 5) Generate Prisma client + migrate + seed
+## Tech stack (Streamlit version)
 
-```bash
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
-```
-
-### 6) Start development apps
-
-```bash
-pnpm dev
-```
-
-- Web: http://localhost:3000
-- API: http://localhost:4000
-
-## Seeded login credentials
-
-- **Email**: `admin@schoolyluxe.com`
-- **Password**: `Admin@12345`
-
-(Overridable with `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `.env`.)
-
-## API endpoints (MVP)
-
-- `GET /health`
-- `POST /auth/login`
-- `GET /auth/me`
-- `GET /dashboard/summary`
-- `GET /students`
-- `POST /students`
-- `GET /attendance`
-- `POST /attendance`
-- `GET /assets`
-- `POST /assets`
-- `GET /schools`
-
-## Scripts
-
-```bash
-pnpm dev        # run web + api in watch mode
-pnpm build      # turbo build
-pnpm lint       # turbo type-check style linting
-pnpm test       # placeholder tests
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
-```
-
-## Known limitations (MVP scope)
-
-- Single-school operational assumptions in frontend flows.
-- Basic JWT auth without refresh tokens.
-- No advanced RBAC policy enforcement yet (role stored and returned, but not fully permission-scoped routes).
-- Placeholder test scripts only; deeper automated coverage is roadmap.
+- **Language**: Python 3.9+
+- **Framework**: Streamlit ≥ 1.35
+- **Data**: pandas + in-memory `st.session_state`
+- **Persistence**: session-scoped (demo); swap for any DB adapter as needed
 
 ## Roadmap
 
-1. Multi-tenant school switching and scoped RBAC policy engine.
-2. Full finance module (student billing ledger, receipts, aging reports).
-3. Parent/teacher portals and communication modules.
-4. Advanced analytics visualizations and scheduled reporting.
-5. Audit logs, notifications, and document management.
+1. Persistent storage adapter (Supabase / SQLite / Postgres).
+2. Multi-school support and scoped RBAC.
+3. Full finance module — student billing ledger, receipts, aging reports.
+4. Parent/teacher portals and communication modules.
+5. Advanced analytics charts and scheduled reporting.
 
